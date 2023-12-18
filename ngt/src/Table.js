@@ -34,8 +34,15 @@ export const Table = () => {
     }
   };
 
+  const onCellValueChanged = (event) => {
+    const updatedRowData = rowData.map((row) => (row.id === event.data.id ? event.data : row));
+    setRowData(updatedRowData);
+    // Save data to localStorage when cell value changes
+    saveDataToLocalStorage({ columnDefs, rowData: updatedRowData });
+  };
+
   const addRow = () => {
-    const newRow = {};
+    const newRow = { id: Date.now() }; // Assign a unique ID to the new row
     columnDefs.forEach((column) => {
       newRow[column.field] = '';
     });
@@ -63,10 +70,6 @@ export const Table = () => {
     }
   };
 
-  const saveData = () => {
-    saveDataToLocalStorage({ columnDefs, rowData });
-  };
-
   const onGridReady = (params) => {
     setGridApi(params.api);
   };
@@ -75,9 +78,6 @@ export const Table = () => {
     <div className='ms-5'>
       <button className='btn btn-primary' onClick={() => exportData()} style={{ marginBottom: 2 }}>
         Export
-      </button>
-      <button className='btn btn-dark ms-2' onClick={saveData} style={{ marginBottom: 2 }}>
-        Save Data
       </button>
       <button className='btn btn-outline-success ms-2' onClick={addColumn}>
         Add Column
@@ -97,6 +97,7 @@ export const Table = () => {
           columnDefs={columnDefs}
           defaultColDef={{ editable: true, filter: true, floatingFilter: true, flex: 1 }}
           onGridReady={onGridReady}
+          onCellValueChanged={onCellValueChanged}
         />
       </div>
     </div>
