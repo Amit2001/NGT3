@@ -1,86 +1,104 @@
-import React,{ useState } from 'react'
-import {AgGridReact} from 'ag-grid-react'
-import "ag-grid-community/styles/ag-grid.css"; // Core CSS
-import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
+import React, { useState, useEffect } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
 
-export const Table =()=>{
+export const Table = () => {
+  const [gridApi, setGridApi] = useState(null);
+  const [columnDefs, setColumnDefs] = useState([]);
+  const [rowData, setRowData] = useState([]);
 
-    const [gridApi, setGridApi] = useState(null);
-    const [colDefs, setColumns] = useState([]);
-    const [rowData, setRowData] = useState([]);
-     
-
-    const addColumn = () => {
-        const newColumnName = prompt('Enter column name:');
-        if (newColumnName) {
-          const newColumn = { headerName: newColumnName, field: newColumnName.toLowerCase() };
-          setColumns([...colDefs, newColumn]);
-        }
-      };
-    
-      const addRow = () => {
-        const newRow = {};
-        colDefs.forEach((column) => {
-          newRow[column.field] = '';
-        });
-        setRowData([...rowData, newRow]);
-      };
-    
-    // const rowData = [
-    //     {Name:"Amit Sharma", Age:21},
-    //     {Name:"Devansh Marwaha", Age:22}
-    // ]
-
-    // const colDefs =[
-    //     {
-    //         field:'Name'
-    //     },
-    //     {
-    //         field:'Age'
-    //     }
-    // ]
-
-    //Default behaviour of the columns      
-    const DefaultColumnDefination = {
-        editable:true,
-        filter:true,
-        floatingFilter:true,
-        flex:1
+  useEffect(() => {
+    // Load data from localStorage when the component mounts
+    const savedData = localStorage.getItem('tableData');
+    if (savedData) {
+      const { columnDefs: savedColumnDefs, rowData: savedRowData } = JSON.parse(savedData);
+      setColumnDefs(savedColumnDefs);
+      setRowData(savedRowData);
     }
+  }, []);
 
-
-    //To Download file in CSV mode following two function are required
-
-    const onGridReady = (params) => {
-        setGridApi(params.api);
-      };
-
-    const ExportData = ()=>{
-        gridApi.exportDataAsCsv();
+  useEffect(() => {
+    if (gridApi) {
+      // Do any setup or initialization with the gridApi here
     }
+  }, [gridApi]);
 
+  const addColumn = () => {
+    const newColumnName = prompt('Enter column name:');
+    if (newColumnName) {
+      const newColumn = { headerName: newColumnName, field: newColumnName.toLowerCase() };
+      setColumnDefs([...columnDefs, newColumn]);
+      // Save data to localStorage when columns are added
+      saveDataToLocalStorage({ columnDefs: [...columnDefs, newColumn], rowData });
+    }
+  };
 
+  const addRow = () => {
+    const newRow = {};
+    columnDefs.forEach((column) => {
+      newRow[column.field] = '';
+    });
+    setRowData([...rowData, newRow]);
+    // Save data to localStorage when rows are added
+    saveDataToLocalStorage({ columnDefs, rowData: [...rowData, newRow] });
+  };
 
-    return(
+  const saveDataToLocalStorage = (data) => {
+    localStorage.setItem('tableData', JSON.stringify(data));
+  };
 
-        <div className='ms-5'>
+  const calculateColumnSum = () => {
+    const columnName = prompt('Enter column name:');
+    const columnValues = rowData.map((row) => parseFloat(row[columnName]) || 0);
+    const sum = columnValues.reduce((acc, value) => acc + value, 0);
+    return sum;
+  };
 
-        <button className='btn btn-primary' onClick={()=>ExportData()} style={{marginBottom:2}} >
-              Export
-        </button>
+  const exportData = () => {
+    if (gridApi && rowData.length > 0) {
+      gridApi.exportDataAsCsv();
+    } else {
+      alert('No data to export.');
+    }
+  };
 
-        <button className='btn btn-outline-success ms-2' onClick={addColumn}>Add Column</button>
-        <button className='btn btn-outline-danger ms-2' onClick={addRow}>Add Row</button>
+  const saveData = () => {
+    saveDataToLocalStorage({ columnDefs, rowData });
+  };
 
-        <div className="ag-theme-quartz" style={{ height: 500, width: '90vw'}}>
-            <AgGridReact
-             rowData={rowData} 
-             columnDefs={colDefs}
-             defaultColDef={DefaultColumnDefination}
-             onGridReady={onGridReady} />
-        </div>
-        </div>
-    )
-        
-    
-}
+  const onGridReady = (params) => {
+    setGridApi(params.api);
+  };
+
+  return (
+    <div className='ms-5'>
+      <button className='btn btn-primary' onClick={() => exportData()} style={{ marginBottom: 2 }}>
+        Export
+      </button>
+      <button className='btn btn-dark ms-2' onClick={saveData} style={{ marginBottom: 2 }}>
+        Save Data
+      </button>
+      <button className='btn btn-outline-success ms-2' onClick={addColumn}>
+        Add Column
+      </button>
+      <button className='btn btn-outline-danger ms-2' onClick={addRow}>
+        Add Row
+      </button>
+      <button
+        className='btn btn-outline-info ms-2'
+        onClick={() => alert(`Sum: ${calculateColumnSum()}`)}
+      >
+        Calculate Sum
+      </button>
+      <div className='ag-theme-quartz' style={{ height: 500, width: '90vw' }}>
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={columnDefs}
+          defaultColDef={{ editable: true, filter: true, floatingFilter: true, flex: 1 }}
+          onGridReady={onGridReady}
+        />
+      </div>
+    </div>
+  );
+};
