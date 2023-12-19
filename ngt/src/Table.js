@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import {  toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
@@ -18,11 +20,11 @@ export const Table = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (gridApi) {
-      // Do any setup or initialization with the gridApi here
-    }
-  }, [gridApi]);
+//   useEffect(() => {
+//     if (gridApi) {
+//       // Do any setup or initialization with the gridApi here
+//     }
+//   }, [gridApi]);
 
   const addColumn = () => {
     const newColumnName = prompt('Enter column name:');
@@ -31,14 +33,18 @@ export const Table = () => {
       setColumnDefs([...columnDefs, newColumn]);
       // Save data to localStorage when columns are added
       saveDataToLocalStorage({ columnDefs: [...columnDefs, newColumn], rowData });
+      notify('Column Element Added Successfully');
     }
   };
 
+  
   const onCellValueChanged = (event) => {
     const updatedRowData = rowData.map((row) => (row.id === event.data.id ? event.data : row));
     setRowData(updatedRowData);
     // Save data to localStorage when cell value changes
     saveDataToLocalStorage({ columnDefs, rowData: updatedRowData });
+
+    notify('Row Element Added Successfully');
   };
 
   const addRow = () => {
@@ -51,6 +57,7 @@ export const Table = () => {
     saveDataToLocalStorage({ columnDefs, rowData: [...rowData, newRow] });
   };
 
+  //Function to save data to localStorage
   const saveDataToLocalStorage = (data) => {
     localStorage.setItem('tableData', JSON.stringify(data));
   };
@@ -62,6 +69,10 @@ export const Table = () => {
     return sum;
   };
 
+  //For Toast Messages
+  const notify = (param) => toast(param);
+
+  //Function used to export the data in csv format
   const exportData = () => {
     if (gridApi && rowData.length > 0) {
       gridApi.exportDataAsCsv();
