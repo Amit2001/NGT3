@@ -26,6 +26,12 @@ export const Table = () => {
 //     }
 //   }, [gridApi]);
 
+//Clear localstorage
+const clearAll=()=>{
+  localStorage.removeItem('tableData');
+  window.location.reload();
+}
+
   const addColumn = () => {
     const newColumnName = prompt('Enter column name:');
     if (newColumnName) {
@@ -62,11 +68,34 @@ export const Table = () => {
     localStorage.setItem('tableData', JSON.stringify(data));
   };
 
+  //For sum
   const calculateColumnSum = () => {
     const columnName = prompt('Enter column name:');
     const columnValues = rowData.map((row) => parseFloat(row[columnName]) || 0);
     const sum = columnValues.reduce((acc, value) => acc + value, 0);
     return sum;
+  };
+
+  //For ratio based ops
+  const calculateValuesBasedOnRatios = () => {
+    const sourceColumn = prompt('Enter source column name:');
+    const targetColumn = prompt('Enter target column name:');
+
+    if (sourceColumn && targetColumn) {
+      const newData = calculateValuesBasedOnRatiosFunction(rowData, sourceColumn, targetColumn);
+      setRowData(newData);
+      saveDataToLocalStorage({ columnDefs, rowData: newData });
+    }
+  };
+
+  const calculateValuesBasedOnRatiosFunction = (data, sourceColumn, targetColumn) => {
+    const totalTarget = data.reduce((total, row) => total + parseInt(row[targetColumn] || 0), 0);
+    const totalSource = data.reduce((total, row) => total + parseInt(row[sourceColumn] || 0), 0);
+    const ratios = data.map((row) => (row[sourceColumn] || 0) / totalSource);
+    const valuesTarget = ratios.map((ratio) => ratio * totalTarget);
+
+    const newData = data.map((row, index) => ({ ...row, [targetColumn]: valuesTarget[index] }));
+    return newData;
   };
 
   //For Toast Messages
@@ -90,17 +119,29 @@ export const Table = () => {
       <button className='btn btn-primary' onClick={() => exportData()} style={{ marginBottom: 2 }}>
         Export
       </button>
-      <button className='btn btn-outline-success ms-2' onClick={addColumn}>
+      <button className='btn btn-danger ms-2' onClick={clearAll} style={{ marginBottom: 2 }}>
+        Clear All
+      </button>
+      <button className='btn btn-outline-dark ms-2' onClick={addColumn} style={{ marginBottom: 2 }}>
         Add Column
       </button>
-      <button className='btn btn-outline-danger ms-2' onClick={addRow}>
+      <button className='btn btn-outline-dark ms-2' onClick={addRow} style={{ marginBottom: 2 }}>
         Add Row
       </button>
+      <span style={{marginLeft:10,marginBottom:2,fontWeight:500}}>Functions:</span>
       <button
         className='btn btn-outline-info ms-2'
         onClick={() => alert(`Sum: ${calculateColumnSum()}`)}
+        style={{ marginBottom: 2 }}
       >
         Calculate Sum
+      </button>
+      <button
+        className='btn btn-outline-info ms-2'
+        onClick={calculateValuesBasedOnRatios}
+        style={{ marginBottom: 2 }}
+      >
+        Calculate Ratios
       </button>
       <div className='ag-theme-quartz' style={{ height: 500, width: '90vw' }}>
         <AgGridReact
