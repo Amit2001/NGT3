@@ -70,31 +70,36 @@ const clearAll=()=>{
 
   //For sum
   const calculateColumnSum = () => {
-    const columnName = prompt('Enter column name:');
+    const columnName = prompt('Enter column name:').toLowerCase();
     const columnValues = rowData.map((row) => parseFloat(row[columnName]) || 0);
     const sum = columnValues.reduce((acc, value) => acc + value, 0);
-    return sum;
+    return parseInt(sum);
+    
+    
   };
 
   //For ratio based ops
   const calculateValuesBasedOnRatios = () => {
-    const sourceColumn = prompt('Enter source column name:');
-    const targetColumn = prompt('Enter target column name:');
+    const sourceColumn = prompt('Enter source column name:').toLowerCase();
+    const targetColumn = prompt('Enter target column name:').toLowerCase();
+    const totalSumOfTarget = prompt('Enter total sum of target columns values');
 
     if (sourceColumn && targetColumn) {
-      const newData = calculateValuesBasedOnRatiosFunction(rowData, sourceColumn, targetColumn);
+      const newData = calculateValuesBasedOnRatiosFunction(rowData, sourceColumn, targetColumn,totalSumOfTarget);
       setRowData(newData);
       saveDataToLocalStorage({ columnDefs, rowData: newData });
     }
   };
 
-  const calculateValuesBasedOnRatiosFunction = (data, sourceColumn, targetColumn) => {
-    const totalTarget = data.reduce((total, row) => total + parseInt(row[targetColumn] || 0), 0);
+  const calculateValuesBasedOnRatiosFunction = (data, sourceColumn, targetColumn,totalSumOfTarget) => {
+    // const totalTarget = data.reduce((total, row) => total + parseInt(row[targetColumn] || 0), 0);
+    const totalTarget = totalSumOfTarget
     const totalSource = data.reduce((total, row) => total + parseInt(row[sourceColumn] || 0), 0);
     const ratios = data.map((row) => (row[sourceColumn] || 0) / totalSource);
     const valuesTarget = ratios.map((ratio) => ratio * totalTarget);
 
     const newData = data.map((row, index) => ({ ...row, [targetColumn]: valuesTarget[index] }));
+    console.log(newData)
     return newData;
   };
 
