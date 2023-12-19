@@ -70,19 +70,25 @@ const clearAll=()=>{
 
   //For sum
   const calculateColumnSum = () => {
-    const columnName = prompt('Enter column name:').toLowerCase();
+    const columnName = prompt('Enter column name:')?.toLowerCase();
     const columnValues = rowData.map((row) => parseFloat(row[columnName]) || 0);
     const sum = columnValues.reduce((acc, value) => acc + value, 0);
     return parseInt(sum);
-    
-    
   };
 
   //For ratio based ops
   const calculateValuesBasedOnRatios = () => {
-    const sourceColumn = prompt('Enter source column name:').toLowerCase();
-    const targetColumn = prompt('Enter target column name:').toLowerCase();
-    const totalSumOfTarget = prompt('Enter total sum of target columns values');
+    const sourceColumn = prompt('Enter source column name:')?.toLowerCase();
+    var targetColumn;
+    var totalSumOfTarget;
+    if(sourceColumn){
+       targetColumn = prompt('Enter target column name:')?.toLowerCase();
+       if(targetColumn){
+        totalSumOfTarget = prompt('Enter total sum of target columns values');
+       }
+       
+    }
+    
 
     if (sourceColumn && targetColumn) {
       const newData = calculateValuesBasedOnRatiosFunction(rowData, sourceColumn, targetColumn,totalSumOfTarget);
