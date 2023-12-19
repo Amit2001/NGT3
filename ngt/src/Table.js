@@ -89,7 +89,6 @@ const clearAll=()=>{
        
     }
     
-
     if (sourceColumn && targetColumn) {
       const newData = calculateValuesBasedOnRatiosFunction(rowData, sourceColumn, targetColumn,totalSumOfTarget);
       setRowData(newData);
