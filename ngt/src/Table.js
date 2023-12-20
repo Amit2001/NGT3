@@ -171,7 +171,7 @@ const clearAll=()=>{
       <button className='btn btn-outline-info ms-2' onClick={calculateValuesBasedOnRatios} style={{ marginBottom: 2 }}>
         Calculate Ratios
       </button>
-      <div className='ag-theme-quartz' style={{ height: 500, width: '90vw' }}>
+      <div className='ag-theme-quartz mt-2 mb-3' style={{ height: 500, width: '90vw' }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columnDefs}
