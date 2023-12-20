@@ -74,9 +74,12 @@ const clearAll=()=>{
   //For sum
   const calculateColumnSum = () => {
     const columnName = prompt('Enter column name:')?.toLowerCase();
-    const columnValues = rowData.map((row) => parseFloat(row[columnName]) || 0);
-    const sum = columnValues.reduce((acc, value) => acc + value, 0);
-    return parseInt(sum);
+    if(columnName){
+      const columnValues = rowData.map((row) => parseFloat(row[columnName]) || 0);
+      const sum = columnValues.reduce((acc, value) => acc + value, 0);
+      alert(`Total sum for column ${columnName} is ${sum}`);
+    }
+    
   };
 
   //For ratio based ops
@@ -165,7 +168,7 @@ const clearAll=()=>{
         Add Row
       </button>
       <span style={{marginLeft:10,marginBottom:2,fontWeight:500}}>Functions:</span>
-      <button className='btn btn-outline-info ms-2' onClick={() => alert(`Sum: ${calculateColumnSum()}`)} style={{ marginBottom: 2 }}>
+      <button className='btn btn-outline-info ms-2' onClick={() => calculateColumnSum()} style={{ marginBottom: 2 }}>
         Calculate Sum
       </button>
       <button className='btn btn-outline-info ms-2' onClick={calculateValuesBasedOnRatios} style={{ marginBottom: 2 }}>
