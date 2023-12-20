@@ -110,8 +110,8 @@ const clearAll=()=>{
     return newData;
   };
 
-  //Function to delete the selected row
-  const deleteRow = () => {
+  //Function to delete the selected rows (Use ^ctrl in order to select multiple rows and ^shift in order to select upto a particular row)
+  const deleteRows = () => {
     if (!gridApi) {
       console.error('Grid API is not available');
       return;
@@ -119,17 +119,21 @@ const clearAll=()=>{
 
     const selectedNodes = gridApi.getSelectedNodes();
     if (selectedNodes.length === 0) {
-      notify('Please select a row to delete.');
+      notify('Please select rows to delete.');
       return;
     }
 
-    const selectedNode = selectedNodes[0];
-    const updatedRowData = rowData.filter((row) => row.id !== selectedNode.data.id);
+    const selectedRowIds = selectedNodes.map((node) => node.data.id);
+    const updatedRowData = rowData.filter((row) => !selectedRowIds.includes(row.id));
 
     setRowData(updatedRowData);
     saveDataToLocalStorage({ columnDefs, rowData: updatedRowData });
-    notify('Row Deleted Successfully');
+    notify('Selected Rows Deleted Successfully');
+
+    // Clear the selected rows after deletion
+    gridApi.deselectAll();
   };
+
 
   //For Toast Messages
   const notify = (param) => toast(param);
@@ -151,8 +155,8 @@ const clearAll=()=>{
       <button className='btn btn-danger ms-2' onClick={clearAll} style={{ marginBottom: 2 }}>
         Clear All
       </button>
-      <button className="btn btn-warning ms-2" onClick={(deleteRow)} style={{ marginBottom: 2 }}>
-        Delete Selected Row
+      <button className="btn btn-warning ms-2" onClick={(deleteRows)} style={{ marginBottom: 2 }}>
+        Delete Selected Rows
       </button>
       <button className='btn btn-outline-dark ms-2' onClick={addColumn} style={{ marginBottom: 2 }}>
         Add Column
@@ -174,7 +178,7 @@ const clearAll=()=>{
           defaultColDef={{ editable: true, filter: true, floatingFilter: true, flex: 1 }}
           onGridReady={onGridReady}
           onCellValueChanged={onCellValueChanged}
-          rowSelection="single"
+          rowSelection="multiple"
         />
       </div>
     </div>
