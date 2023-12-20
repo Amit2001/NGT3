@@ -20,11 +20,15 @@ export const Table = () => {
     }
   }, []);
 
-//   useEffect(() => {
-//     if (gridApi) {
-//       // Do any setup or initialization with the gridApi here
-//     }
-//   }, [gridApi]);
+  useEffect(() => {
+     if (gridApi) {
+       // Do any setup or initialization with the gridApi here
+     }
+  }, [gridApi]);
+
+const onGridReady = (params) => {
+  setGridApi(params.api);
+};
 
 //Clear localstorage
 const clearAll=()=>{
@@ -42,7 +46,6 @@ const clearAll=()=>{
       notify('Column Element Added Successfully');
     }
   };
-
   
   const onCellValueChanged = (event) => {
     const updatedRowData = rowData.map((row) => (row.id === event.data.id ? event.data : row));
@@ -102,10 +105,30 @@ const clearAll=()=>{
     const totalSource = data.reduce((total, row) => total + parseInt(row[sourceColumn] || 0), 0);
     const ratios = data.map((row) => (row[sourceColumn] || 0) / totalSource);
     const valuesTarget = ratios.map((ratio) => ratio * totalTarget);
-
     const newData = data.map((row, index) => ({ ...row, [targetColumn]: valuesTarget[index] }));
     console.log(newData)
     return newData;
+  };
+
+  //Function to delete the selected row
+  const deleteRow = () => {
+    if (!gridApi) {
+      console.error('Grid API is not available');
+      return;
+    }
+
+    const selectedNodes = gridApi.getSelectedNodes();
+    if (selectedNodes.length === 0) {
+      notify('Please select a row to delete.');
+      return;
+    }
+
+    const selectedNode = selectedNodes[0];
+    const updatedRowData = rowData.filter((row) => row.id !== selectedNode.data.id);
+
+    setRowData(updatedRowData);
+    saveDataToLocalStorage({ columnDefs, rowData: updatedRowData });
+    notify('Row Deleted Successfully');
   };
 
   //For Toast Messages
@@ -120,10 +143,6 @@ const clearAll=()=>{
     }
   };
 
-  const onGridReady = (params) => {
-    setGridApi(params.api);
-  };
-
   return (
     <div className='ms-5'>
       <button className='btn btn-primary' onClick={() => exportData()} style={{ marginBottom: 2 }}>
@@ -132,6 +151,9 @@ const clearAll=()=>{
       <button className='btn btn-danger ms-2' onClick={clearAll} style={{ marginBottom: 2 }}>
         Clear All
       </button>
+      <button className="btn btn-warning ms-2" onClick={(deleteRow)} style={{ marginBottom: 2 }}>
+        Delete Selected Row
+      </button>
       <button className='btn btn-outline-dark ms-2' onClick={addColumn} style={{ marginBottom: 2 }}>
         Add Column
       </button>
@@ -139,18 +161,10 @@ const clearAll=()=>{
         Add Row
       </button>
       <span style={{marginLeft:10,marginBottom:2,fontWeight:500}}>Functions:</span>
-      <button
-        className='btn btn-outline-info ms-2'
-        onClick={() => alert(`Sum: ${calculateColumnSum()}`)}
-        style={{ marginBottom: 2 }}
-      >
+      <button className='btn btn-outline-info ms-2' onClick={() => alert(`Sum: ${calculateColumnSum()}`)} style={{ marginBottom: 2 }}>
         Calculate Sum
       </button>
-      <button
-        className='btn btn-outline-info ms-2'
-        onClick={calculateValuesBasedOnRatios}
-        style={{ marginBottom: 2 }}
-      >
+      <button className='btn btn-outline-info ms-2' onClick={calculateValuesBasedOnRatios} style={{ marginBottom: 2 }}>
         Calculate Ratios
       </button>
       <div className='ag-theme-quartz' style={{ height: 500, width: '90vw' }}>
@@ -160,6 +174,7 @@ const clearAll=()=>{
           defaultColDef={{ editable: true, filter: true, floatingFilter: true, flex: 1 }}
           onGridReady={onGridReady}
           onCellValueChanged={onCellValueChanged}
+          rowSelection="single"
         />
       </div>
     </div>
