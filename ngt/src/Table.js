@@ -113,6 +113,44 @@ const clearAll=()=>{
     return newData;
   };
 
+  const calculateSumForSubColumns = () => {
+    // const columnName = prompt('Enter column name for value to match:')?.toLowerCase();
+    // if (!columnName) return;
+
+    // const columnValue = prompt(`Enter value for column "${columnName}":`);
+    // if (!columnValue) return;
+
+    if (!gridApi) {
+      console.error('Grid API is not available');
+      return;
+    }
+
+    const selectedNodes = gridApi.getSelectedNodes();
+    if (selectedNodes.length === 0) {
+      notify('Please select rows to calculate sum.');
+      return;
+    }
+
+    const targetColumnName = prompt('Enter target column name for sum:');
+    if (!targetColumnName) return;
+
+    const selectedRows = selectedNodes.map((node) => node.data);
+    console.log(selectedRows)
+    // const updatedRowData = rowData.filter((row) => !selectedRowIds.includes(row.id));
+
+    
+
+    // console.log(rowData)
+
+    // const matchingRows = rowData.filter((row) => row[columnName] === columnValue);
+    // console.log(matchingRows);
+    
+    const sum = selectedRows.reduce((acc, row) => acc + parseFloat(row[targetColumnName] || 0), 0);
+
+
+    alert(`Sum of ${targetColumnName} for Selected rows : ${Math.floor(sum)}`);
+  };
+
   //Function to delete the selected rows (Use ^ctrl in order to select multiple rows and ^shift in order to select upto a particular row)
   const deleteRows = () => {
     if (!gridApi) {
@@ -171,6 +209,9 @@ const clearAll=()=>{
       <button className='btn btn-outline-info ms-2' onClick={() => calculateColumnSum()} style={{ marginBottom: 2 }}>
         Calculate Sum
       </button>
+      <button className='btn btn-outline-info ms-2' onClick={calculateSumForSubColumns}>
+        Sum Sub Rows
+      </button>
       <button className='btn btn-outline-info ms-2' onClick={calculateValuesBasedOnRatios} style={{ marginBottom: 2 }}>
         Calculate Ratios
       </button>
@@ -182,6 +223,7 @@ const clearAll=()=>{
           onGridReady={onGridReady}
           onCellValueChanged={onCellValueChanged}
           rowSelection="multiple"
+          
         />
       </div>
     </div>
