@@ -36,7 +36,8 @@ const clearAll=()=>{
   window.location.reload();
 }
 
-  const addColumn = () => {
+//To add Column in the grid
+const addColumn = () => {
     const newColumnName = prompt('Enter column name:');
     if (newColumnName) {
       const newColumn = { headerName: newColumnName, field: newColumnName.toLowerCase() };
@@ -46,8 +47,9 @@ const clearAll=()=>{
       notify('Column Element Added Successfully');
     }
   };
-  
-  const onCellValueChanged = (event) => {
+
+//To change / update a rows value
+const onCellValueChanged = (event) => {
     const updatedRowData = rowData.map((row) => (row.id === event.data.id ? event.data : row));
     setRowData(updatedRowData);
     // Save data to localStorage when cell value changes
@@ -102,6 +104,7 @@ const clearAll=()=>{
     }
   };
 
+  
   const calculateValuesBasedOnRatiosFunction = (data, sourceColumn, targetColumn,totalSumOfTarget) => {
     // const totalTarget = data.reduce((total, row) => total + parseInt(row[targetColumn] || 0), 0);
     const totalTarget = totalSumOfTarget
@@ -113,12 +116,9 @@ const clearAll=()=>{
     return newData;
   };
 
-  const calculateSumForSubColumns = () => {
-    // const columnName = prompt('Enter column name for value to match:')?.toLowerCase();
-    // if (!columnName) return;
 
-    // const columnValue = prompt(`Enter value for column "${columnName}":`);
-    // if (!columnValue) return;
+  // To calculate sum for sub rows
+  const calculateSumForSubRows = () => {
 
     if (!gridApi) {
       console.error('Grid API is not available');
@@ -136,20 +136,13 @@ const clearAll=()=>{
 
     const selectedRows = selectedNodes.map((node) => node.data);
     console.log(selectedRows)
-    // const updatedRowData = rowData.filter((row) => !selectedRowIds.includes(row.id));
 
-    
-
-    // console.log(rowData)
-
-    // const matchingRows = rowData.filter((row) => row[columnName] === columnValue);
-    // console.log(matchingRows);
-    
     const sum = selectedRows.reduce((acc, row) => acc + parseFloat(row[targetColumnName] || 0), 0);
-
 
     alert(`Sum of ${targetColumnName} for Selected rows : ${Math.floor(sum)}`);
   };
+
+
 
   //Function to delete the selected rows (Use ^ctrl in order to select multiple rows and ^shift in order to select upto a particular row)
   const deleteRows = () => {
@@ -209,7 +202,7 @@ const clearAll=()=>{
       <button className='btn btn-outline-info ms-2' onClick={() => calculateColumnSum()} style={{ marginBottom: 2 }}>
         Calculate Sum
       </button>
-      <button className='btn btn-outline-info ms-2' onClick={calculateSumForSubColumns}>
+      <button className='btn btn-outline-info ms-2' onClick={calculateSumForSubRows}>
         Sum Sub Rows
       </button>
       <button className='btn btn-outline-info ms-2' onClick={calculateValuesBasedOnRatios} style={{ marginBottom: 2 }}>
