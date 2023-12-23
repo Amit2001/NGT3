@@ -86,37 +86,60 @@ const onCellValueChanged = (event) => {
 
   //For ratio based ops
   const calculateValuesBasedOnRatios = () => {
-    const sourceColumn = prompt('Enter source column name:')?.toLowerCase();
-    var targetColumn;
-    var totalSumOfTarget;
-    if(sourceColumn){
-       targetColumn = prompt('Enter target column name:')?.toLowerCase();
-       if(targetColumn){
-        totalSumOfTarget = prompt('Enter total sum of target columns values');
-       }
-       
+    if (!gridApi) {
+      console.error('Grid API is not available');
+      return;
     }
-    
-    if (sourceColumn && targetColumn) {
-      const newData = calculateValuesBasedOnRatiosFunction(rowData, sourceColumn, targetColumn,totalSumOfTarget);
-      setRowData(newData);
-      saveDataToLocalStorage({ columnDefs, rowData: newData });
-    }
-  };
-
   
-  const calculateValuesBasedOnRatiosFunction = (data, sourceColumn, targetColumn,totalSumOfTarget) => {
-    // const totalTarget = data.reduce((total, row) => total + parseInt(row[targetColumn] || 0), 0);
-    const totalTarget = totalSumOfTarget
-    const totalSource = data.reduce((total, row) => total + parseInt(row[sourceColumn] || 0), 0);
-    const ratios = data.map((row) => (row[sourceColumn] || 0) / totalSource);
-    const valuesTarget = ratios.map((ratio) => ratio * totalTarget);
-    const newData = data.map((row, index) => ({ ...row, [targetColumn]: valuesTarget[index] }));
-    console.log(newData)
-    return newData;
-  };
-
-
+    const selectedNodes = gridApi.getSelectedNodes();
+    if (selectedNodes.length === 0) {
+      notify('Please select rows to calculate ratio.');
+      return;
+    }
+  
+    const sourceColumn = prompt('Enter source column name:')?.toLowerCase();
+    let targetColumn;
+    let totalSumOfTarget;
+    if (sourceColumn) {
+      targetColumn = prompt('Enter target column name:')?.toLowerCase();
+      if (targetColumn) {
+        totalSumOfTarget = prompt('Enter total sum of target columns values');
+      }
+    }
+  
+    if (sourceColumn && targetColumn) {
+      const updatedRowData = [...rowData];
+  
+      selectedNodes.forEach((node) => {
+        const sourceValue = parseFloat(node.data[sourceColumn]);
+  
+        if (!isNaN(sourceValue) && isFinite(sourceValue)) {
+          const totalSource = selectedNodes.reduce((total, row) => {
+            const value = parseFloat(row.data[sourceColumn]);
+            return !isNaN(value) && isFinite(value) ? total + value : total;
+          }, 0);
+  
+          const ratio = totalSource !== 0 ? sourceValue / totalSource : 0;
+          const valueTarget = ratio * totalSumOfTarget;
+  
+          if (!isNaN(valueTarget) && isFinite(valueTarget)) {
+            // Find the index of the node in the original rowData
+            const index = updatedRowData.findIndex((row) => row.id === node.data.id);
+  
+            if (index !== -1) {
+              // Update the target column value in the original rowData
+              updatedRowData[index] = { ...node.data, [targetColumn]: String(valueTarget) };
+            }
+          }
+        }
+      });
+  
+      setRowData(updatedRowData);
+      saveDataToLocalStorage({ columnDefs, rowData: updatedRowData });
+    }
+  };  
+  
+  
   // To calculate sum for sub rows
   const calculateSumForSubRows = () => {
 
@@ -216,7 +239,6 @@ const onCellValueChanged = (event) => {
           onGridReady={onGridReady}
           onCellValueChanged={onCellValueChanged}
           rowSelection="multiple"
-          
         />
       </div>
     </div>
